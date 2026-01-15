@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Event.Presentation/Event.Presentation.csproj" />
+  <Project Path="Events.Application/Events.Application.csproj" />
+  <Project Path="Events.Domain/Events.Domain.csproj" />
+  <Project Path="Events.Persistence/Events.Persistence.csproj" />
+  <Project Path="Events.Test/Events.Test.csproj" />
+</Solution>
