@@ -9,6 +9,10 @@ public static class DependencyInjection
     {
         services.AddScoped<CreateEventUseCase>();
         services.AddScoped<PublishEventUseCase>();
+        services.AddScoped<CancelEventUseCase>();
+        services.AddScoped<PostponeEventUseCase>();
+        services.AddScoped<EventPostTicketUseCase>();
+        services.AddScoped<EventConfirmTicketUseCase>();
         
         return services;
     }

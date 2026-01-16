@@ -5,7 +5,7 @@ using Events.Domain.Enums;
 using FluentResults;
 
 [assembly: InternalsVisibleTo("Events.Persistence")]
-[assembly: InternalsVisibleTo("Events.Unitary")]
+[assembly: InternalsVisibleTo("Events.Test")]
 namespace Events.Domain.AggregateRoots;
 
 public sealed class Event
@@ -131,24 +131,21 @@ public sealed class Event
 
     public Result PostTicket(string email, string token)
     {
-        if (this.Status is not EventStatus.Published)
-            return Result.Fail(EventErrors.EventMustBePublished);
-
-        if (this.Status is EventStatus.SoldOut)
-            return Result.Fail(EventErrors.EventIsFull);
-
+        if (this.Status is EventStatus.Published || this.Status is  EventStatus.SoldOut)
+        {
+            return Result.Fail(this.Status is EventStatus.SoldOut ? EventErrors.EventIsFull : EventErrors.EventMustBePublished);
+        }
+        
         Ticket? ticket = this._tickets.SingleOrDefault(t => t.Email == email);
         if (ticket is not null)
             return Result.Fail(EventErrors.TicketEmailAlreadyRequestedForThisEvent);
-
-
+        
         Result<Ticket> create = Ticket.Create(email, this.InscriptionStartDate, this.InscriptionEndDate, token);
         if (create.IsFailed)
             return Result.Fail(create.Errors);
 
         this.TicketsAmount = this.TicketsAmount - 1;
         this._tickets.Add(create.Value);
-
         if (this.TicketsAmount == 0)
             this.Status = EventStatus.SoldOut;
 
