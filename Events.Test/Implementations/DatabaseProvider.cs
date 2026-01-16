@@ -32,7 +32,41 @@ public class DatabaseProvider:IDatabaseProvider,IAsyncDisposable
     public async Task InitializeDatabase()
     {
         const string query = """
-
+                             create type event_status as enum('drafted','published','cancelled','postponed','completed','soldout');
+                             create type ticket_status as enum('toconfirm','confirmed','expired','cancelled');
+                             create type location_type as enum('virtual','inperson','hybrid');
+                             
+                             create table events(
+                                 id uuid,
+                                 name varchar(250) not null,
+                                 description text not null,
+                                 start_date timestamp not null,
+                                 end_date timestamp not null,
+                                 inscription_start timestamp,
+                                 inscription_end timestamp,
+                                 organization varchar(250) not null,
+                                 status event_status,
+                                 tickets integer,
+                                 location_type location_type,
+                                 url varchar(250),
+                                 token varchar(36) not null,
+                                 coordinates varchar(250),
+                                 primary key(id)
+                             );
+                             
+                             create table tickets(
+                                 id uuid,
+                                 status ticket_status,
+                                 emitted timestamp,
+                                 email varchar(250) not null,
+                                 token varchar(36) not null,
+                                 event_id uuid,
+                                 primary key(id),
+                                 constraint fk_event
+                                     foreign key (event_id)
+                                         references events(id)
+                                             on delete cascade
+                             );
                              """;
         
         await this._dataSource.OpenConnectionAsync();
