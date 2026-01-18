@@ -44,7 +44,7 @@ public sealed class Event
 
     internal static Event Rehydrate(Guid id, string name, string description, DateTime startDate, DateTime endDate, DateTime inscriptionStart, DateTime inscriptionEnd, string organization, int ticketsAmount, EventStatus status, LocationType locationType, string? locationUrl, string? coordinates, string token, IList<Ticket> tickets)
     {
-        Event @event = new Event(id,name, description, startDate, endDate, inscriptionStart, inscriptionEnd, organization, ticketsAmount, status, locationType, locationUrl, coordinates, token, tickets);
+        Event @event = new Event(id, name, description, startDate, endDate, inscriptionStart, inscriptionEnd, organization, ticketsAmount, status, locationType, locationUrl, coordinates, token, tickets);
         return @event;
     }
 
@@ -131,21 +131,22 @@ public sealed class Event
 
     public Result PostTicket(string email, string token)
     {
-        if (this.Status is EventStatus.Published || this.Status is  EventStatus.SoldOut)
+        if (this.Status is EventStatus.Published || this.Status is EventStatus.SoldOut)
         {
             return Result.Fail(this.Status is EventStatus.SoldOut ? EventErrors.EventIsFull : EventErrors.EventMustBePublished);
         }
-        
+
         Ticket? ticket = this._tickets.SingleOrDefault(t => t.Email == email);
         if (ticket is not null)
             return Result.Fail(EventErrors.TicketEmailAlreadyRequestedForThisEvent);
-        
+
         Result<Ticket> create = Ticket.Create(email, this.InscriptionStartDate, this.InscriptionEndDate, token);
         if (create.IsFailed)
             return Result.Fail(create.Errors);
 
         this.TicketsAmount = this.TicketsAmount - 1;
         this._tickets.Add(create.Value);
+
         if (this.TicketsAmount == 0)
             this.Status = EventStatus.SoldOut;
 
